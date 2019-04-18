@@ -35,15 +35,16 @@ for subdir, dirs, files in os.walk(maskdir):
     for file in files:
         path=os.path.join(subdir, file)
         path_no_root = os.path.join(*(path.split(os.path.sep)[1:]))
-        actual_image = Image.open(
+        if not "DS_Store" in path:
+            actual_image = Image.open(
                  os.path.join("images",path_no_root),'r')
-        mask_image = Image.open(path, 'r')
-        get_human_mask(
+            mask_image = Image.open(path, 'r')
+            get_human_mask(
                 actual_image,
                 mask_image,
                 os.path.join("human_mask",path_no_root)
                        )
-        image_to_BW_mask(
+            image_to_BW_mask(
                 mask_image,
                 os.path.join("BW_mask",path_no_root)
                        )
