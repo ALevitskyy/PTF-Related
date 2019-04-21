@@ -69,7 +69,7 @@ class DecoderBlock(nn.Module):
 
 
 class AlbuNet(nn.Module):
-    def __init__(self, num_classes=1, num_filters=32, pretrained=False):
+    def __init__(self, num_classes=1, num_filters=32, pretrained="imagenet"):
         super().__init__()
         self.num_classes = num_classes
 

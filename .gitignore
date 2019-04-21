@@ -1,0 +1,5 @@
+/canvas_segmentation/2019_04_19.zip
+/canvas_segmentation/images/*
+/canvas_segmentation/log/*
+/canvas_segmentation/inferred/*
+/canvas_segmentation/train_val_split.json

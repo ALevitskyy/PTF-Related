@@ -7,11 +7,14 @@ from catalyst.contrib.criterion import FocalLoss
 from catalyst.dl.experiments.runner import SupervisedRunner
 from catalyst.dl.callbacks import (
     LossCallback, TensorboardLogger, OptimizerCallback, CheckpointCallback,  ConsoleLogger)
-from data import MMADataset
 
+from data.MMADataset import MMADataset
+from config import split_file
+from data.final_transforms import transforms, valid_transforms
+from models.AlbuNet.AlbuNet import AlbuNet
 class Model:
-    def __init__(self, image_dir, logs_dir, batch_size, workers):
-        self.data = image_dir
+    def __init__(self, logs_dir="log", batch_size=32, workers=3):
+        self.data = split_file
         if os.path.exists(logs_dir) == False:
             os.mkdir(logs_dir)
         self.logs_dir = logs_dir
@@ -22,13 +25,17 @@ class Model:
     def get_data(self):
         loaders = collections.OrderedDict()
         train_loader = DataLoader(
-            dataset=MMADataset(self.data,valid=False),
+            dataset=MMADataset(self.data,
+                transforms = transforms,
+                valid=False),
             batch_size=self.batch_size,
             shuffle=True,
             num_workers=self.workers
         )
         valid_loader = DataLoader(
-            dataset=MMADataset(self.data,valid=True),
+            dataset=MMADataset(self.data,
+                       transforms = valid_transforms,
+                       valid=True),
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.workers
@@ -40,14 +47,13 @@ class Model:
         return loaders
 
     def set_callbacks(self):
-        callbacks = collections.OrderedDict()
-        callbacks['saver'] = CheckpointCallback(
-                    os.path.join(self.logs_dir, 'checkpoints/best.pth')
-                )
-        callbacks['loss'] = LossCallback()
-        callbacks['optimizer'] = OptimizerCallback()
-        callbacks['logger'] = ConsoleLogger()
-        callbacks['tflogger'] = TensorboardLogger()
+        callbacks = [
+                LossCallback(),
+                CheckpointCallback(save_n_best=2),
+                OptimizerCallback(),
+                ConsoleLogger(),
+                TensorboardLogger()
+                ]
         return callbacks
 
     def train(self,model, epoch):
@@ -69,5 +75,10 @@ class Model:
             scheduler = scheduler,
             num_epochs = epoch,
             verbose = True,
-            callbackas = callbacks
+            callbacks = callbacks
         )
+
+net = AlbuNet()
+net.cuda()
+model = Model()
+model.train(net, 30)
