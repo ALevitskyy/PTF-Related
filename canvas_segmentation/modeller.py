@@ -13,7 +13,12 @@ from config import split_file
 from data.final_transforms import transforms, valid_transforms
 from models.AlbuNet.AlbuNet import AlbuNet
 class Model:
-    def __init__(self, logs_dir="log", batch_size=32, workers=3):
+    def __init__(self,
+            transforms = transforms,
+            criterion = FocalLoss(),
+            logs_dir="log",
+            batch_size=32,
+            workers=3):
         self.data = split_file
         if os.path.exists(logs_dir) == False:
             os.mkdir(logs_dir)
@@ -21,12 +26,14 @@ class Model:
         self.batch_size = batch_size
         self.workers = workers
         self.classes = ['canvas']
+        self.transforms = transforms
+        self.criterion = criterion
 
     def get_data(self):
         loaders = collections.OrderedDict()
         train_loader = DataLoader(
             dataset=MMADataset(self.data,
-                transforms = transforms,
+                transforms = self.transforms,
                 valid=False),
             batch_size=self.batch_size,
             shuffle=True,
@@ -58,17 +65,15 @@ class Model:
 
     def train(self,model, epoch):
         model = model
-        criterion = FocalLoss()
-        optimizer = optim.Adam(model.parameters(), lr=1e-4)
-        callbacks = self.set_callbacks()
-        scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[10, 20, 40], gamma=0.3)
         loaders = self.get_data()
-
         runner = SupervisedRunner()
+        optimizer = optim.Adam(model.parameters(), lr=1e-4)
+        scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[10,20,40], gamma=0.3)
+        callbacks = self.set_callbacks()
 
         runner.train(
             model = model,
-            criterion = criterion,
+            criterion = self.criterion,
             loaders = loaders,
             logdir = self.logs_dir,
             optimizer = optimizer,
@@ -78,7 +83,4 @@ class Model:
             callbacks = callbacks
         )
 
-net = AlbuNet()
-net.cuda()
-model = Model()
-model.train(net, 30)
+
