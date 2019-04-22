@@ -8,3 +8,7 @@
 /canvas_segmentation/inferred/*
 /canvas_segmentation/video_frames/*
 /canvas_segmentation/video_frames_processed/*
+/canvas_segmentation/inferred2/*
+/canvas_segmentation/test.mp4
+/canvas_segmentation/nohup.out
+
