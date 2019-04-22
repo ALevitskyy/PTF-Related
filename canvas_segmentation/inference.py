@@ -24,7 +24,7 @@ class Infer:
         super(Infer, self).__init__()
         #If folder is not specified work with validation pics
         if image_folder is not None:
-            self.loader = InferenceDataset(image_folder = None,
+            self.loader = InferenceDataset(image_folder = image_folder,
                     transforms = test_transform)
         else:
             self.loader = MMADataset(split_file = split_file,
@@ -58,6 +58,7 @@ class Infer:
         runner.infer(
             model=model,
             loaders=loaders,
+            verbose = True,
             callbacks=[
                 CheckpointCallback(
                     resume=os.path.join(self.__logs_dir, 'checkpoints/last.pth')
@@ -67,7 +68,6 @@ class Infer:
         )
         sigmoid = lambda x: 1/(1 + np.exp(-x))
         for i, (input, output) in enumerate(zip(self.loader.image_list, runner.callbacks[1].predictions['logits'])):
-            print(i)
             threshold = self.threshold
             output = sigmoid(output)
             image_path = input
@@ -81,8 +81,3 @@ class Infer:
             overlay = make_overlay(image, canvas)
             cv2.imwrite(os.path.join(self.__rez_dir, "mask",file_name), canvas)
             cv2.imwrite(os.path.join(self.__rez_dir, "overlay", file_name), overlay)
-
-inferer= Infer()
-model = AlbuNet()
-model.cuda()
-inferer.inference(model)

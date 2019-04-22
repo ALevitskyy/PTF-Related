@@ -8,7 +8,8 @@ import numpy as np
 class InferenceDataset(Dataset):
 
     def __init__(self, image_folder, transforms = None):
-        self.image_list = glob(image_folder+"/*.png",recursive = True)
+        self.image_list = glob(image_folder+"/*.png",recursive = True)+\
+                                   glob(image_folder+"/*.jpg",recursive = True)
         self.image_list = [[i] for i in self.image_list] # to be similar with MMADatset
         self.transforms = transforms
 

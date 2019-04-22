@@ -3,3 +3,8 @@
 /canvas_segmentation/log/*
 /canvas_segmentation/inferred/*
 /canvas_segmentation/train_val_split.json
+/canvas_segmentation/log2/*
+/canvas_segmentation/ufc234_gastelum_bisping_1080p_nosound_cut.mp4
+/canvas_segmentation/inferred/*
+/canvas_segmentation/video_frames/*
+/canvas_segmentation/video_frames_processed/*
