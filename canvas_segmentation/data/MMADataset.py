@@ -12,7 +12,7 @@ class MMADataset(Dataset):
             if valid:
                 self.image_list = image_list["valid"]
             else:
-                self.image_list = image_list["train"]
+                self.image_list = image_list["train"]*4 #calculate validaiton every 5th epoch
         self.transforms = transforms
 
     def __len__(self):
