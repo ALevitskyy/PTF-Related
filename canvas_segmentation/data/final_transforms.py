@@ -2,7 +2,7 @@ from .utils import targets_aug
 from albumentations import Compose, RGBShift, RandomGamma,\
         RandomCrop, ShiftScaleRotate, VerticalFlip, HorizontalFlip,\
          RandomRotate90, RandomBrightnessContrast, GaussNoise,\
-         PadIfNeeded, HueSaturationValue
+         PadIfNeeded, HueSaturationValue, Resize
 
 def transforms(targets):
     aug = targets_aug([RandomCrop(256, 256),
@@ -16,7 +16,7 @@ def transforms(targets):
     return aug
 
 def valid_transforms(targets):
-    aug = targets_aug([RandomCrop(256, 256)], targets)
+    aug = targets_aug([Resize(512, 1024)], targets)
     return aug
 
 def test_transform(targets):
