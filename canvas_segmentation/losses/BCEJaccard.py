@@ -23,3 +23,19 @@ class LossBinary(_Loss):
 
             loss += self.jaccard_weight * (1 - (intersection + eps) / (union - intersection + eps))
         return loss
+
+
+class IOUMetric(_Loss):
+    def __init__(self):
+        super(LossBinary, self).__init__()
+
+    def forward(self, outputs: Tensor, targets: Tensor) -> Tensor:
+        eps = 1e-15
+        jaccard_target = (targets == 1).float()
+        jaccard_output = outputs
+
+        intersection = (jaccard_output * jaccard_target).sum()
+        union = jaccard_output.sum() + jaccard_target.sum()
+
+        metric = (intersection + eps) / (union - intersection + eps)
+        return metric

@@ -17,7 +17,7 @@ class Model:
             transforms = transforms,
             criterion = FocalLoss(),
             logs_dir="log",
-            batch_size=32,
+            batch_size=16,
             workers=3):
         self.data = split_file
         if os.path.exists(logs_dir) == False:
@@ -43,7 +43,7 @@ class Model:
             dataset=MMADataset(self.data,
                        transforms = valid_transforms,
                        valid=True),
-            batch_size=self.batch_size,
+            batch_size=4,
             shuffle=False,
             num_workers=self.workers
         )

@@ -7,6 +7,29 @@ from pathlib import Path
 from typing import Dict, Tuple, List, Union
 import cv2
 import numpy as np
+from config import split_file
+import os
+
+def make_ground_truth(split_file=split_file,
+        target_dir="ground_truth"):
+    with open(split_file,"r") as f:
+        image_list = eval(f.read())
+    os.mkdir(target_dir)
+    os.mkdir(os.path.join(target_dir, "mask"))
+    os.mkdir(os.path.join(target_dir, "image"))
+    print(image_list["valid"])
+    for i in image_list["valid"]:
+        file_path0 = i[0]
+        file_path1 = i[1]
+        image_name = file_path0.split("/")[-1]
+        image = cv2.imread(file_path0)
+        mask = cv2.imread(file_path1)
+        cv2.imwrite(
+                os.path.join(target_dir,"image",image_name),
+                image)
+        cv2.imwrite(
+                os.path.join(target_dir,"mask",image_name),
+                mask)
 
 def make_overlay(
                 img: np.ndarray, mask: np.ndarray,

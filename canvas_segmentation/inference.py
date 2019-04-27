@@ -72,7 +72,7 @@ class Infer:
             verbose = True,
             callbacks=[
                 CheckpointCallback(
-                    resume=os.path.join(self.__logs_dir, 'checkpoints/last.pth')
+                    resume=os.path.join(self.__logs_dir, 'checkpoints/best.pth')
                 ),
                 InferCallback()
             ]
