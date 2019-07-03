@@ -35,8 +35,9 @@ RUN add-apt-repository ppa:jonathonf/python-3.6
 RUN apt -yq update
 RUN apt -yq install python3.6
 RUN curl https://bootstrap.pypa.io/get-pip.py | sudo -H python3.6
-RUN git clone https://github.com/akanazawa/human_dynamics /hmmr
-RUN git clone https://github.com/poxyu/punch-to-face-tech /ptf
+RUN git clone https://github.com/akanazawa/human_dynamics ./hmmr
+RUN git clone https://github.com/poxyu/punch-to-face-tech ./ptf
 # Install Python dependencies
-RUN pip3.6 install -r /hmmr/requirements.txt
+RUN pip3.6 install -r ./hmmr/requirements.txt
 RUN pip3.6 install jupyter "opencv-python==3.4.2.16" --force-reinstall
+
