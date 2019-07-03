@@ -10,7 +10,7 @@ ENV LD_LIBRARY_PATH /usr/local/caffe2_build/lib:${LD_LIBRARY_PATH}
 # Clone the Detectron repository and HMMR
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt -yq  update
-RUN apt -yq  install python3-pip
+RUN apt -yq  install python3.6.1-pip
 RUN git clone https://github.com/facebookresearch/densepose /densepose
 RUN git clone https://github.com/akanazawa/human_dynamics /hmmr
 RUN git clone https://github.com/poxyu/punch-to-face-tech /ptf
