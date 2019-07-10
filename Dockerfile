@@ -26,6 +26,18 @@ RUN make
 # [Optional] Build custom ops
 RUN make ops
 
+#Densepose pre-install
+RUN apt -yq update
+RUN apt install -yq wget nano ffmpeg
+RUN cd DensePoseData
+RUN bash get_densepose_uv.sh
+RUN pip2 install "pyyaml==3.12"
+# Need to change the config
+# cd configs
+# cp DensePose_ResNet101_FPN_s1x-e2e.yaml my_config.yaml my_config.yaml
+# nano my_config.yaml
+# Change line 77 Dectections_per_im to 1.
+
 # MY STUFF
 WORKDIR /PTF
 ENV DEBIAN_FRONTEND noninteractive
@@ -34,10 +46,25 @@ RUN apt install -yq software-properties-common
 RUN add-apt-repository ppa:jonathonf/python-3.6
 RUN apt -yq update
 RUN apt -yq install python3.6
+RUN apt -yq install ffmpeg
 RUN curl https://bootstrap.pypa.io/get-pip.py | sudo -H python3.6
 RUN git clone https://github.com/akanazawa/human_dynamics ./hmmr
 RUN git clone https://github.com/poxyu/punch-to-face-tech ./ptf
 # Install Python dependencies
 RUN pip3.6 install -r ./hmmr/requirements.txt
-RUN pip3.6 install jupyter "opencv-python==3.4.2.16" --force-reinstall
+WORKDIR ./hmmr/src/external
+RUN apt install -yq python3-tk python3.6-dev
+RUN install_external.sh
+WORKDIR ./neural_renderer
+RUN python3.6 setup.py install
+WORKDIR /PTF/hmmr
+RUN wget http://angjookanazawa.com/cachedir/hmmr/hmmr_models.tar.gz && tar -xf hmmr_models.tar.gz
+RUN wget http://angjookanazawa.com/cachedir/hmmr/hmmr_demo_data.tar.gz && tar -xf hmmr_demo_data.tar.gz
+# update-alternatives --install /usr/bin/python python /usr/bin/python3 10
+# Need to install yolo https://github.com/akanazawa/AlphaPose/tree/pytorch#installation
+
+
+# Running poxyu notebook
+WORKDIR /PTF
+RUN pip3.6 install ffmpy jupyter "opencv-python==3.4.2.16" --force-reinstall
 
