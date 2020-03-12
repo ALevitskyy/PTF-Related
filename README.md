@@ -1,6 +1,6 @@
 # PTF-Related
 
-Repository for some of the code I did for Punch-to-Face project, which aims to build 3D reconstructions of MMA fights in Virtual Reality creating a new niche in entertainment industry.
+Repository for some of the non-production code I did for Punch-to-Face project, which aims to build 3D reconstructions of MMA fights in Virtual Reality creating a new niche in entertainment industry.
 
 The repository features:
 1) **textures** folder contains code to convert DensePose outputs to Blender compatible textures for SMPL models
