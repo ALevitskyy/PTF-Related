@@ -1,4 +1,3 @@
-
 import torch
 from queue import Queue
 
@@ -19,9 +18,18 @@ class InPlaceABN(ABN):
             else:  # use exponential moving average
                 exponential_average_factor = self.momentum
 
-        return inplace_abn(x, self.weight, self.bias, self.running_mean, self.running_var,
-                           self.training or not self.track_running_stats,
-                           exponential_average_factor, self.eps, self.activation, self.slope)
+        return inplace_abn(
+            x,
+            self.weight,
+            self.bias,
+            self.running_mean,
+            self.running_var,
+            self.training or not self.track_running_stats,
+            exponential_average_factor,
+            self.eps,
+            self.activation,
+            self.slope,
+        )
 
 
 class InPlaceABNSync(ABN):
@@ -30,8 +38,17 @@ class InPlaceABNSync(ABN):
     This assumes that it will be replicated across GPUs using the same mechanism as in `nn.DataParallel`.
     """
 
-    def __init__(self, num_features, eps=1e-5, momentum=0.1, affine=True, track_running_stats=True,
-                 activation="leaky_relu", slope=0.01, devices=None):
+    def __init__(
+        self,
+        num_features,
+        eps=1e-5,
+        momentum=0.1,
+        affine=True,
+        track_running_stats=True,
+        activation="leaky_relu",
+        slope=0.01,
+        devices=None,
+    ):
         """Creates a synchronized, InPlace Activated Batch Normalization module
 
         Parameters
@@ -51,8 +68,15 @@ class InPlaceABNSync(ABN):
         slope : float
             Negative slope for the `leaky_relu` activation.
         """
-        super().__init__(num_features=num_features, eps=eps, momentum=momentum, affine=affine,
-                         track_running_stats=track_running_stats, activation=activation, slope=slope)
+        super().__init__(
+            num_features=num_features,
+            eps=eps,
+            momentum=momentum,
+            affine=affine,
+            track_running_stats=track_running_stats,
+            activation=activation,
+            slope=slope,
+        )
         self.devices = devices if devices else list(range(torch.cuda.device_count()))
 
         # Initialize queues
@@ -71,20 +95,33 @@ class InPlaceABNSync(ABN):
                 "is_master": True,
                 "master_queue": self.master_queue,
                 "worker_queues": self.worker_queues,
-                "worker_ids": self.worker_ids
+                "worker_ids": self.worker_ids,
             }
         else:
             # Worker mode
             extra = {
                 "is_master": False,
                 "master_queue": self.master_queue,
-                "worker_queue": self.worker_queues[self.worker_ids.index(x.get_device())]
+                "worker_queue": self.worker_queues[
+                    self.worker_ids.index(x.get_device())
+                ],
             }
 
-        return inplace_abn_sync(x, self.weight, self.bias, self.running_mean, self.running_var,
-                                extra, self.training, self.momentum, self.eps, self.activation, self.slope)
+        return inplace_abn_sync(
+            x,
+            self.weight,
+            self.bias,
+            self.running_mean,
+            self.running_var,
+            extra,
+            self.training,
+            self.momentum,
+            self.eps,
+            self.activation,
+            self.slope,
+        )
 
     def extra_repr(self):
         rep = super().extra_repr()
-        rep += ', devices={devices}'.format(**self.__dict__)
+        rep += ", devices={devices}".format(**self.__dict__)
         return rep

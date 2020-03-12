@@ -23,7 +23,10 @@ class SelfAttentionBlock2D(nn.Module):
         N X C X H X W
         position-aware context features.(w/o concate or add with the input)
     """
-    def __init__(self, in_channels, key_channels, value_channels, out_channels=None, scale=1):
+
+    def __init__(
+        self, in_channels, key_channels, value_channels, out_channels=None, scale=1
+    ):
         super().__init__()
         self.scale = scale
         self.in_channels = in_channels
@@ -34,14 +37,30 @@ class SelfAttentionBlock2D(nn.Module):
             self.out_channels = in_channels
         self.pool = nn.MaxPool2d(kernel_size=(scale, scale))
         self.f_key = nn.Sequential(
-            nn.Conv2d(in_channels=self.in_channels, out_channels=self.key_channels, kernel_size=1, stride=1, padding=0),
-            ActivatedBatchNorm(self.key_channels)
+            nn.Conv2d(
+                in_channels=self.in_channels,
+                out_channels=self.key_channels,
+                kernel_size=1,
+                stride=1,
+                padding=0,
+            ),
+            ActivatedBatchNorm(self.key_channels),
         )
         self.f_query = self.f_key
-        self.f_value = nn.Conv2d(in_channels=self.in_channels, out_channels=self.value_channels,
-                                 kernel_size=1, stride=1, padding=0)
-        self.W = nn.Conv2d(in_channels=self.value_channels, out_channels=self.out_channels,
-                           kernel_size=1, stride=1, padding=0)
+        self.f_value = nn.Conv2d(
+            in_channels=self.in_channels,
+            out_channels=self.value_channels,
+            kernel_size=1,
+            stride=1,
+            padding=0,
+        )
+        self.W = nn.Conv2d(
+            in_channels=self.value_channels,
+            out_channels=self.out_channels,
+            kernel_size=1,
+            stride=1,
+            padding=0,
+        )
         nn.init.constant(self.W.weight, 0)
         nn.init.constant(self.W.bias, 0)
 
@@ -57,7 +76,7 @@ class SelfAttentionBlock2D(nn.Module):
         key = self.f_key(x).view(batch_size, self.key_channels, -1)
 
         sim_map = torch.matmul(query, key)
-        sim_map = (self.key_channels**-.5) * sim_map
+        sim_map = (self.key_channels ** -0.5) * sim_map
         sim_map = F.softmax(sim_map, dim=-1)
 
         context = torch.matmul(sim_map, value)
@@ -65,7 +84,9 @@ class SelfAttentionBlock2D(nn.Module):
         context = context.view(batch_size, self.value_channels, *x.size()[2:])
         context = self.W(context)
         if self.scale > 1:
-            context = F.upsample(input=context, size=(h, w), mode='bilinear', align_corners=True)
+            context = F.upsample(
+                input=context, size=(h, w), mode="bilinear", align_corners=True
+            )
         return context
 
 
@@ -80,14 +101,29 @@ class BaseOC(nn.Module):
         features fused with Object context information.
     """
 
-    def __init__(self, in_channels, out_channels, key_channels, value_channels, dropout, sizes=(1,)):
+    def __init__(
+        self,
+        in_channels,
+        out_channels,
+        key_channels,
+        value_channels,
+        dropout,
+        sizes=(1,),
+    ):
         super().__init__()
         self.stages = nn.ModuleList(
-            [SelfAttentionBlock2D(in_channels, key_channels, value_channels, out_channels, size) for size in sizes])
+            [
+                SelfAttentionBlock2D(
+                    in_channels, key_channels, value_channels, out_channels, size
+                )
+                for size in sizes
+            ]
+        )
         self.conv_bn_dropout = nn.Sequential(
             nn.Conv2d(2 * in_channels, out_channels, kernel_size=1, padding=0),
             ActivatedBatchNorm(out_channels),
-            nn.Dropout2d(dropout))
+            nn.Dropout2d(dropout),
+        )
 
     def forward(self, feats):
         priors = [stage(feats) for stage in self.stages]

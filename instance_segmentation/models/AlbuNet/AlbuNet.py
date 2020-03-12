@@ -35,10 +35,7 @@ class ConvBNRelu(nn.Module):
 
 
 class Interpolate(nn.Module):
-    def __init__(
-            self, size=None, scale_factor=None,
-            mode='nearest'
-        ):
+    def __init__(self, size=None, scale_factor=None, mode="nearest"):
         super().__init__()
         self.interp = F.interpolate
         self.size = size
@@ -47,8 +44,7 @@ class Interpolate(nn.Module):
 
     def forward(self, x):
         x = self.interp(
-            x, size=self.size, scale_factor=self.scale_factor,
-            mode=self.mode
+            x, size=self.size, scale_factor=self.scale_factor, mode=self.mode
         )
         return x
 
@@ -59,7 +55,7 @@ class DecoderBlock(nn.Module):
         self.in_channels = in_channels
 
         self.block = nn.Sequential(
-            Interpolate(scale_factor=2, mode='nearest'),
+            Interpolate(scale_factor=2, mode="nearest"),
             ConvRelu(in_channels, middle_channels),
             ConvRelu(middle_channels, out_channels),
         )
@@ -79,10 +75,9 @@ class AlbuNet(nn.Module):
 
         self.relu = nn.ReLU(inplace=True)
 
-        self.conv1 = nn.Sequential(self.encoder.conv1,
-                                   self.encoder.bn1,
-                                   self.encoder.relu,
-                                   self.pool)
+        self.conv1 = nn.Sequential(
+            self.encoder.conv1, self.encoder.bn1, self.encoder.relu, self.pool
+        )
 
         self.conv2 = self.encoder.layer1
 
@@ -94,10 +89,18 @@ class AlbuNet(nn.Module):
 
         self.center = DecoderBlock(512, num_filters * 8 * 2, num_filters * 8)
 
-        self.dec5 = DecoderBlock(512 + num_filters * 8, num_filters * 8 * 2, num_filters * 8)
-        self.dec4 = DecoderBlock(256 + num_filters * 8, num_filters * 8 * 2, num_filters * 8)
-        self.dec3 = DecoderBlock(128 + num_filters * 8, num_filters * 4 * 2, num_filters * 2)
-        self.dec2 = DecoderBlock(64 + num_filters * 2, num_filters * 2 * 2, num_filters * 2 * 2)
+        self.dec5 = DecoderBlock(
+            512 + num_filters * 8, num_filters * 8 * 2, num_filters * 8
+        )
+        self.dec4 = DecoderBlock(
+            256 + num_filters * 8, num_filters * 8 * 2, num_filters * 8
+        )
+        self.dec3 = DecoderBlock(
+            128 + num_filters * 8, num_filters * 4 * 2, num_filters * 2
+        )
+        self.dec2 = DecoderBlock(
+            64 + num_filters * 2, num_filters * 2 * 2, num_filters * 2 * 2
+        )
         self.dec1 = DecoderBlock(num_filters * 2 * 2, num_filters * 2 * 2, num_filters)
         self.dec0 = ConvRelu(num_filters, num_filters)
         self.final = nn.Conv2d(num_filters, num_classes, kernel_size=1)

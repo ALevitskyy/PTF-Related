@@ -1,4 +1,3 @@
-
 import torch.nn as nn
 import torch.nn.functional as functional
 
@@ -9,8 +8,16 @@ class ABN(nn.BatchNorm2d):
     This gathers a `BatchNorm2d` and an activation function in a single module
     """
 
-    def __init__(self, num_features, eps=1e-5, momentum=0.1, affine=True, track_running_stats=True,
-                 activation="leaky_relu", slope=0.01):
+    def __init__(
+        self,
+        num_features,
+        eps=1e-5,
+        momentum=0.1,
+        affine=True,
+        track_running_stats=True,
+        activation="leaky_relu",
+        slope=0.01,
+    ):
         """Creates an Activated Batch Normalization module
 
         Parameters
@@ -28,8 +35,13 @@ class ABN(nn.BatchNorm2d):
         slope : float
             Negative slope for the `leaky_relu` activation.
         """
-        super().__init__(num_features=num_features, eps=eps, momentum=momentum, affine=affine,
-                         track_running_stats=track_running_stats)
+        super().__init__(
+            num_features=num_features,
+            eps=eps,
+            momentum=momentum,
+            affine=affine,
+            track_running_stats=track_running_stats,
+        )
 
         if activation not in ("leaky_relu", "elu", "none"):
             raise NotImplementedError(activation)
@@ -49,7 +61,7 @@ class ABN(nn.BatchNorm2d):
 
     def extra_repr(self):
         rep = super().extra_repr()
-        rep += ', activation={activation}'.format(**self.__dict__)
+        rep += ", activation={activation}".format(**self.__dict__)
         if self.activation == "leaky_relu":
-            rep += ', slope={slope}'.format(**self.__dict__)
+            rep += ", slope={slope}".format(**self.__dict__)
         return rep

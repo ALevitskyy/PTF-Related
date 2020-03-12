@@ -7,23 +7,44 @@ import torch.utils.model_zoo as model_zoo
 import torchvision
 from .inplace_abn import ActivatedBatchNorm
 
-BASENET_CHOICES = ('vgg11', 'vgg13', 'vgg16', 'vgg19',
-                   'vgg11_bn', 'vgg13_bn', 'vgg16_bn', 'vgg19_bn',
-                   'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152',
-                   'resnext101_32x4d', 'resnext101_64x4d',
-                   'se_resnet50', 'se_resnet101', 'se_resnet152',
-                   'se_resnext50_32x4d', 'se_resnext101_32x4d', 'senet154',
-                   'darknet')
+BASENET_CHOICES = (
+    "vgg11",
+    "vgg13",
+    "vgg16",
+    "vgg19",
+    "vgg11_bn",
+    "vgg13_bn",
+    "vgg16_bn",
+    "vgg19_bn",
+    "resnet18",
+    "resnet34",
+    "resnet50",
+    "resnet101",
+    "resnet152",
+    "resnext101_32x4d",
+    "resnext101_64x4d",
+    "se_resnet50",
+    "se_resnet101",
+    "se_resnet152",
+    "se_resnext50_32x4d",
+    "se_resnext101_32x4d",
+    "senet154",
+    "darknet",
+)
 
-MODEL_ZOO_URL = 'https://drontheimerstr.synology.me/model_zoo/'
+MODEL_ZOO_URL = "https://drontheimerstr.synology.me/model_zoo/"
 
 MODEL_URLS = {
-    'resnet50': {
+    "resnet50": {
         # 'voc':  MODEL_ZOO_URL + 'SSDretina_resnet50_c21-fb6036d1.pth',  # SSDretina_resnet50_c81-a584ead7.pth pretrained
-        'voc': MODEL_ZOO_URL + 'SSDretina_resnet50_c21-1c85a349.pth',  # SSDretina_resnet50_c501-06095077.pth pretrained
-        'coco': MODEL_ZOO_URL + 'SSDretina_resnet50_c81-a584ead7.pth',
-        'oid': MODEL_ZOO_URL + 'SSDretina_resnet50_c501-06095077.pth'},
-    'resnext101_32x4d': {'coco': MODEL_ZOO_URL + 'SSDretina_resnext101_32x4d_c81-fdb37546.pth'}
+        "voc": MODEL_ZOO_URL
+        + "SSDretina_resnet50_c21-1c85a349.pth",  # SSDretina_resnet50_c501-06095077.pth pretrained
+        "coco": MODEL_ZOO_URL + "SSDretina_resnet50_c81-a584ead7.pth",
+        "oid": MODEL_ZOO_URL + "SSDretina_resnet50_c501-06095077.pth",
+    },
+    "resnext101_32x4d": {
+        "coco": MODEL_ZOO_URL + "SSDretina_resnext101_32x4d_c81-fdb37546.pth"
+    },
 }
 
 
@@ -33,14 +54,14 @@ def conv(*args, **kwargs):
 
 def get_out_channels(layers):
     """access out_channels from last layer of nn.Sequential/list"""
-    if hasattr(layers, 'out_channels'):
+    if hasattr(layers, "out_channels"):
         return layers.out_channels
     elif isinstance(layers, int):
         return layers
     else:
         for i in range(len(layers) - 1, -1, -1):
             layer = layers[i]
-            if hasattr(layer, 'out_channels'):
+            if hasattr(layer, "out_channels"):
                 return layer.out_channels
             elif isinstance(layer, nn.Sequential):
                 return get_out_channels(layer)
@@ -67,9 +88,7 @@ def sequential(*args):
 def ConvBnRelu(*args, **kwargs):
     """drop in block for nn.Conv2d with BatchNorm and ReLU"""
     c = nn.Conv2d(*args, **kwargs)
-    return Sequential(c,
-                      nn.BatchNorm2d(c.out_channels),
-                      nn.ReLU(inplace=True))
+    return Sequential(c, nn.BatchNorm2d(c.out_channels), nn.ReLU(inplace=True))
 
 
 def conv_bn_relu(*args, **kwargs):
@@ -77,8 +96,7 @@ def conv_bn_relu(*args, **kwargs):
 
 
 def ConvRelu(*args, **kwargs):
-    return Sequential(nn.Conv2d(*args, **kwargs),
-                      nn.ReLU(inplace=True))
+    return Sequential(nn.Conv2d(*args, **kwargs), nn.ReLU(inplace=True))
 
 
 def conv_relu(*args, **kwargs):
@@ -86,8 +104,7 @@ def conv_relu(*args, **kwargs):
 
 
 def ReluConv(*args, **kwargs):
-    return Sequential(nn.ReLU(inplace=True),
-                      nn.Conv2d(*args, **kwargs))
+    return Sequential(nn.ReLU(inplace=True), nn.Conv2d(*args, **kwargs))
 
 
 def relu_conv(*args, **kwargs):
@@ -97,9 +114,7 @@ def relu_conv(*args, **kwargs):
 def BnReluConv(*args, **kwargs):
     """drop in block for nn.Conv2d with BatchNorm and ReLU"""
     c = nn.Conv2d(*args, **kwargs)
-    return Sequential(nn.BatchNorm2d(c.in_channels),
-                      nn.ReLU(inplace=True),
-                      c)
+    return Sequential(nn.BatchNorm2d(c.in_channels), nn.ReLU(inplace=True), c)
 
 
 def bn_relu_conv(*args, **kwargs):
@@ -115,33 +130,33 @@ def vgg_base_extra(bn):
 
 
 def vgg(name, pretrained):
-    if name == 'vgg11':
+    if name == "vgg11":
         net_class = torchvision.models.vgg11
-    elif name == 'vgg13':
+    elif name == "vgg13":
         net_class = torchvision.models.vgg13
-    elif name == 'vgg16':
+    elif name == "vgg16":
         net_class = torchvision.models.vgg16
-    elif name == 'vgg19':
+    elif name == "vgg19":
         net_class = torchvision.models.vgg19
-    elif name == 'vgg11_bn':
+    elif name == "vgg11_bn":
         net_class = torchvision.models.vgg11_bn
-    elif name == 'vgg13_bn':
+    elif name == "vgg13_bn":
         net_class = torchvision.models.vgg13_bn
-    elif name == 'vgg16_bn':
+    elif name == "vgg16_bn":
         net_class = torchvision.models.vgg16_bn
-    elif name == 'vgg19_bn':
+    elif name == "vgg19_bn":
         net_class = torchvision.models.vgg19_bn
     else:
         raise RuntimeError("unknown model {}".format(name))
 
-    imagenet_pretrained = pretrained == 'imagenet'
+    imagenet_pretrained = pretrained == "imagenet"
     vgg = net_class(pretrained=imagenet_pretrained)
 
     # for have exact same layout as original paper
-    if name == 'vgg16':
+    if name == "vgg16":
         vgg.features[16].ceil_mode = True
 
-    bn = name.endswith('bn')
+    bn = name.endswith("bn")
     layers = []
     l = []
     for i in range(len(vgg.features) - 1):
@@ -154,8 +169,7 @@ def vgg(name, pretrained):
 
     # layers of feature scaling 2**5
     block = ConvBnRelu if bn else ConvRelu
-    layer5 = [block(1024, 256, 1, 1, 0),
-              block(256, 512, 3, 2, 1)]
+    layer5 = [block(1024, 256, 1, 1, 0), block(256, 512, 3, 2, 1)]
     layers.append(layer5)
 
     layers = [Sequential(*l) for l in layers]
@@ -164,18 +178,18 @@ def vgg(name, pretrained):
 
 
 def resnet(name, pretrained):
-    if name == 'resnet18':
+    if name == "resnet18":
         net_class = torchvision.models.resnet18
-    elif name == 'resnet34':
+    elif name == "resnet34":
         net_class = torchvision.models.resnet34
-    elif name == 'resnet50':
+    elif name == "resnet50":
         net_class = torchvision.models.resnet50
-    elif name == 'resnet101':
+    elif name == "resnet101":
         net_class = torchvision.models.resnet101
-    elif name == 'resnet152':
+    elif name == "resnet152":
         net_class = torchvision.models.resnet152
 
-    imagenet_pretrained = pretrained == 'imagenet'
+    imagenet_pretrained = pretrained == "imagenet"
     resnet = net_class(pretrained=imagenet_pretrained)
     layer0 = Sequential(resnet.conv1, resnet.bn1, resnet.relu, resnet.maxpool)
 
@@ -189,19 +203,34 @@ def resnet(name, pretrained):
             return block.conv3.out_channels
         raise RuntimeError("unknown resnet block: {}".format(block))
 
-    resnet.layer1.out_channels = resnet.layer1[-1].out_channels = get_out_channels_from_resnet_block(resnet.layer1)
-    resnet.layer2.out_channels = resnet.layer2[-1].out_channels = get_out_channels_from_resnet_block(resnet.layer2)
-    resnet.layer3.out_channels = resnet.layer3[-1].out_channels = get_out_channels_from_resnet_block(resnet.layer3)
-    resnet.layer4.out_channels = resnet.layer4[-1].out_channels = get_out_channels_from_resnet_block(resnet.layer4)
+    resnet.layer1.out_channels = resnet.layer1[
+        -1
+    ].out_channels = get_out_channels_from_resnet_block(resnet.layer1)
+    resnet.layer2.out_channels = resnet.layer2[
+        -1
+    ].out_channels = get_out_channels_from_resnet_block(resnet.layer2)
+    resnet.layer3.out_channels = resnet.layer3[
+        -1
+    ].out_channels = get_out_channels_from_resnet_block(resnet.layer3)
+    resnet.layer4.out_channels = resnet.layer4[
+        -1
+    ].out_channels = get_out_channels_from_resnet_block(resnet.layer4)
     n_pretrained = 5 if imagenet_pretrained else 0
-    return [layer0, resnet.layer1, resnet.layer2, resnet.layer3, resnet.layer4], True, n_pretrained
+    return (
+        [layer0, resnet.layer1, resnet.layer2, resnet.layer3, resnet.layer4],
+        True,
+        n_pretrained,
+    )
 
 
 def resnext(name, pretrained):
     import pretrainedmodels
-    if name in ['resnext101_32x4d', 'resnext101_64x4d']:
-        imagenet_pretrained = 'imagenet' if pretrained == 'imagenet' else None
-        resnext = pretrainedmodels.__dict__[name](num_classes=1000, pretrained=imagenet_pretrained)
+
+    if name in ["resnext101_32x4d", "resnext101_64x4d"]:
+        imagenet_pretrained = "imagenet" if pretrained == "imagenet" else None
+        resnext = pretrainedmodels.__dict__[name](
+            num_classes=1000, pretrained=imagenet_pretrained
+        )
     else:
         return NotImplemented
 
@@ -228,21 +257,23 @@ def resnext(name, pretrained):
 def replace_bn(bn, act=None):
     slop = 0.01
     if isinstance(act, nn.ReLU):
-        activation = 'leaky_relu'  # approximate relu
+        activation = "leaky_relu"  # approximate relu
     elif isinstance(act, nn.LeakyReLU):
-        activation = 'leaky_relu'
+        activation = "leaky_relu"
         slope = act.negative_slope
     elif isinstance(act, nn.ELU):
-        activation = 'elu'
+        activation = "elu"
     else:
-        activation = 'none'
-    abn = ActivatedBatchNorm(num_features=bn.num_features,
-                             eps=bn.eps,
-                             momentum=bn.momentum,
-                             affine=bn.affine,
-                             track_running_stats=bn.track_running_stats,
-                             activation=activation,
-                             slope=slop)
+        activation = "none"
+    abn = ActivatedBatchNorm(
+        num_features=bn.num_features,
+        eps=bn.eps,
+        momentum=bn.momentum,
+        affine=bn.affine,
+        track_running_stats=bn.track_running_stats,
+        activation=activation,
+        slope=slop,
+    )
     abn.load_state_dict(bn.state_dict())
     return abn
 
@@ -254,13 +285,13 @@ def replace_bn_in_sequential(layer0, block=None):
         if isinstance(m, nn.BatchNorm2d):
             last_bn = (n, m)
         else:
-            activation = 'none'
+            activation = "none"
             if last_bn:
                 abn = replace_bn(last_bn[1], m)
                 activation = abn.activation
                 layer0_modules.append((last_bn[0], abn))
                 last_bn = None
-            if activation == 'none':
+            if activation == "none":
                 if block and isinstance(m, block):
                     m = replace_bn_in_block(m)
                 elif isinstance(m, nn.Sequential):
@@ -284,15 +315,24 @@ def replace_bn_in_block(block):
     block.relu = DummyModule()
     if block.downsample:
         block.downsample = replace_bn_in_sequential(block.downsample)
-    return nn.Sequential(block,
-                         nn.ReLU(inplace=True))
+    return nn.Sequential(block, nn.ReLU(inplace=True))
 
 
 def se_net(name, pretrained):
     import pretrainedmodels
-    if name in ['se_resnet50', 'se_resnet101', 'se_resnet152', 'se_resnext50_32x4d', 'se_resnext101_32x4d', 'senet154']:
-        imagenet_pretrained = 'imagenet' if pretrained == 'imagenet' else None
-        senet = pretrainedmodels.__dict__[name](num_classes=1000, pretrained=imagenet_pretrained)
+
+    if name in [
+        "se_resnet50",
+        "se_resnet101",
+        "se_resnet152",
+        "se_resnext50_32x4d",
+        "se_resnext101_32x4d",
+        "senet154",
+    ]:
+        imagenet_pretrained = "imagenet" if pretrained == "imagenet" else None
+        senet = pretrainedmodels.__dict__[name](
+            num_classes=1000, pretrained=imagenet_pretrained
+        )
     else:
         return NotImplemented
 
@@ -318,6 +358,7 @@ def se_net(name, pretrained):
 
 def darknet(pretrained):
     from .darknet import KitModel as DarkNet
+
     net = DarkNet()
     if pretrained:
         state_dict = torch.load("/media/data/model_zoo/coco/pytorch_yolov3.pth")
@@ -349,33 +390,43 @@ def create_basenet(name, pretrained):
     -------
     list of modules, is_batchnorm, num_of_pretrained_module
     """
-    if name.startswith('vgg'):
+    if name.startswith("vgg"):
         layers, bn, n_pretrained = vgg(name, pretrained)
-    elif name.startswith('resnet'):
+    elif name.startswith("resnet"):
         layers, bn, n_pretrained = resnet(name, pretrained)
-    elif name.startswith('resnext'):
+    elif name.startswith("resnext"):
         layers, bn, n_pretrained = resnext(name, pretrained)
-    elif name.startswith('se'):
+    elif name.startswith("se"):
         layers, bn, n_pretrained = se_net(name, pretrained)
-    elif name == 'darknet':
+    elif name == "darknet":
         layers, bn, n_pretrained = darknet(pretrained)
     else:
         raise NotImplemented(name)
 
-    if pretrained in ('coco', 'oid'):
+    if pretrained in ("coco", "oid"):
         load_pretrained_weights(layers, name, pretrained)
         n_pretrained = len(layers)
 
     return layers, bn, n_pretrained
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description="show network", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('model', nargs=1, choices=BASENET_CHOICES, help='load saved model')
-    parser.add_argument('--pretrained', default=False, type=str, choices=('imagenet', 'voc', 'coco', 'oid'),
-                        help='pretrained dataset')
+    parser = argparse.ArgumentParser(
+        description="show network",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser.add_argument(
+        "model", nargs=1, choices=BASENET_CHOICES, help="load saved model"
+    )
+    parser.add_argument(
+        "--pretrained",
+        default=False,
+        type=str,
+        choices=("imagenet", "voc", "coco", "oid"),
+        help="pretrained dataset",
+    )
 
     args = parser.parse_args()
     model = create_basenet(args.model[0], args.pretrained)

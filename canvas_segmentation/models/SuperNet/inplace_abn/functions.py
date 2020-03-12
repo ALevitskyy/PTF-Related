@@ -6,14 +6,15 @@ from torch.autograd.function import once_differentiable
 from torch.utils.cpp_extension import load
 
 _src_path = path.join(path.dirname(path.abspath(__file__)), "src")
-_backend = load(name="inplace_abn",
-                extra_cflags=["-O3"],
-                sources=[path.join(_src_path, f) for f in [
-                    "inplace_abn.cpp",
-                    "inplace_abn_cpu.cpp",
-                    "inplace_abn_cuda.cu"
-                ]],
-                extra_cuda_cflags=["--expt-extended-lambda"])
+_backend = load(
+    name="inplace_abn",
+    extra_cflags=["-O3"],
+    sources=[
+        path.join(_src_path, f)
+        for f in ["inplace_abn.cpp", "inplace_abn_cpu.cpp", "inplace_abn_cuda.cu"]
+    ],
+    extra_cuda_cflags=["--expt-extended-lambda"],
+)
 
 # Activation names
 ACT_LEAKY_RELU = "leaky_relu"
@@ -73,8 +74,19 @@ def _act_backward(ctx, x, dx):
 
 class InPlaceABN(autograd.Function):
     @staticmethod
-    def forward(ctx, x, weight, bias, running_mean, running_var,
-                training=True, momentum=0.1, eps=1e-05, activation=ACT_LEAKY_RELU, slope=0.01):
+    def forward(
+        ctx,
+        x,
+        weight,
+        bias,
+        running_mean,
+        running_var,
+        training=True,
+        momentum=0.1,
+        eps=1e-05,
+        activation=ACT_LEAKY_RELU,
+        slope=0.01,
+    ):
         # Save context
         ctx.training = training
         ctx.momentum = momentum
@@ -94,7 +106,9 @@ class InPlaceABN(autograd.Function):
 
             # Update running stats
             running_mean.mul_((1 - ctx.momentum)).add_(ctx.momentum * mean)
-            running_var.mul_((1 - ctx.momentum)).add_(ctx.momentum * var * count / (count - 1))
+            running_var.mul_((1 - ctx.momentum)).add_(
+                ctx.momentum * var * count / (count - 1)
+            )
 
             # Mark in-place modified tensors
             ctx.mark_dirty(x, running_mean, running_var)
@@ -127,7 +141,9 @@ class InPlaceABN(autograd.Function):
             edz = dz.new_zeros(dz.size(1))
             eydz = dz.new_zeros(dz.size(1))
 
-        dx, dweight, dbias = _backend.backward(z, dz, var, weight, bias, edz, eydz, ctx.affine, ctx.eps)
+        dx, dweight, dbias = _backend.backward(
+            z, dz, var, weight, bias, edz, eydz, ctx.affine, ctx.eps
+        )
         dweight = dweight if ctx.affine else None
         dbias = dbias if ctx.affine else None
 
@@ -136,8 +152,21 @@ class InPlaceABN(autograd.Function):
 
 class InPlaceABNSync(autograd.Function):
     @classmethod
-    def forward(cls, ctx, x, weight, bias, running_mean, running_var,
-                extra, training=True, momentum=0.1, eps=1e-05, activation=ACT_LEAKY_RELU, slope=0.01):
+    def forward(
+        cls,
+        ctx,
+        x,
+        weight,
+        bias,
+        running_mean,
+        running_var,
+        extra,
+        training=True,
+        momentum=0.1,
+        eps=1e-05,
+        activation=ACT_LEAKY_RELU,
+        slope=0.01,
+    ):
         # Save context
         cls._parse_extra(ctx, extra)
         ctx.training = training
@@ -170,7 +199,9 @@ class InPlaceABNSync(autograd.Function):
                 mean = means.mean(0)
                 var = (vars + (mean - means) ** 2).mean(0)
 
-                tensors = comm.broadcast_coalesced((mean, var), [mean.get_device()] + ctx.worker_ids)
+                tensors = comm.broadcast_coalesced(
+                    (mean, var), [mean.get_device()] + ctx.worker_ids
+                )
                 for ts, queue in zip(tensors[1:], ctx.worker_queues):
                     queue.put(ts)
             else:
@@ -180,7 +211,9 @@ class InPlaceABNSync(autograd.Function):
 
             # Update running stats
             running_mean.mul_((1 - ctx.momentum)).add_(ctx.momentum * mean)
-            running_var.mul_((1 - ctx.momentum)).add_(ctx.momentum * var * count / (count - 1))
+            running_var.mul_((1 - ctx.momentum)).add_(
+                ctx.momentum * var * count / (count - 1)
+            )
 
             # Mark in-place modified tensors
             ctx.mark_dirty(x, running_mean, running_var)
@@ -220,7 +253,9 @@ class InPlaceABNSync(autograd.Function):
                 edz = comm.reduce_add(edzs) / (ctx.master_queue.maxsize + 1)
                 eydz = comm.reduce_add(eydzs) / (ctx.master_queue.maxsize + 1)
 
-                tensors = comm.broadcast_coalesced((edz, eydz), [edz.get_device()] + ctx.worker_ids)
+                tensors = comm.broadcast_coalesced(
+                    (edz, eydz), [edz.get_device()] + ctx.worker_ids
+                )
                 for ts, queue in zip(tensors[1:], ctx.worker_queues):
                     queue.put(ts)
             else:
@@ -231,7 +266,9 @@ class InPlaceABNSync(autograd.Function):
             edz = dz.new_zeros(dz.size(1))
             eydz = dz.new_zeros(dz.size(1))
 
-        dx, dweight, dbias = _backend.backward(z, dz, var, weight, bias, edz, eydz, ctx.affine, ctx.eps)
+        dx, dweight, dbias = _backend.backward(
+            z, dz, var, weight, bias, edz, eydz, ctx.affine, ctx.eps
+        )
         dweight = dweight if ctx.affine else None
         dbias = dbias if ctx.affine else None
 

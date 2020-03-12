@@ -21,7 +21,9 @@ class LossBinary(_Loss):
             intersection = (jaccard_output * jaccard_target).sum()
             union = jaccard_output.sum() + jaccard_target.sum()
 
-            loss += self.jaccard_weight * (1 - (intersection + eps) / (union - intersection + eps))
+            loss += self.jaccard_weight * (
+                1 - (intersection + eps) / (union - intersection + eps)
+            )
         return loss
 
 
